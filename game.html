@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Genki Mission - Ultimate Edition</title>
+    <style>
+        :root {
+            --primary: #00d26a; /* Genki Vivid Green */
+            --primary-dark: #00b050;
+            --accent: #ff6b6b; /* Alert Red */
+            --bg-gradient: linear-gradient(135deg, #e0f7fa 0%, #e8f5e9 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #222; /* Dark background for presentation focus */
+            overflow: hidden;
+        }
+
+        /* The Phone Frame */
+        .phone {
+            width: 380px;
+            height: 700px;
+            background: var(--bg-gradient);
+            border-radius: 40px;
+            border: 12px solid #333;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 0 2px #555, 0 30px 60px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Status Bar (Fake) */
+        .status-bar {
+            height: 30px;
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 25px;
+            font-size: 12px;
+            color: #333;
+            font-weight: bold;
+            z-index: 100;
+        }
+
+        /* Thirst Meter */
+        .meter-container {
+            margin: 10px 20px;
+            background: #ddd;
+            height: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+            z-index: 100;
+        }
+        .meter-fill {
+            height: 100%;
+            background: #ff4757;
+            width: 90%; /* Starts thirsty */
+            transition: width 0.5s ease;
+            animation: pulse-red 1.5s infinite;
+        }
+
+        /* Screens Container */
+        .screen-container {
+            flex: 1;
+            position: relative;
+        }
+
+        /* Individual Slides */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 30px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.5s;
+            opacity: 0;
+            transform: translateX(100%); /* Start off-screen right */
+            pointer-events: none; /* Prevent clicks when hidden */
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: all;
+        }
+
+        .slide.exit-left {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+
+        /* Typography & Elements */
+        h1 { font-size: 32px; color: #333; margin-bottom: 10px; line-height: 1.2; }
+        h2 { font-size: 24px; color: #444; margin-bottom: 20px; }
+        p { color: #666; font-size: 16px; margin-bottom: 30px; line-height: 1.5; }
+
+        .emoji-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+            text-align: center;
+            display: block;
+        }
+
+        /* Cards / Buttons */
+        .choice-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .choice-card:hover {
+            transform: scale(1.02);
+            border-color: var(--primary);
+        }
+
+        .choice-card:active {
+            transform: scale(0.98);
+        }
+
+        .choice-icon {
+            font-size: 28px;
+            margin-right: 15px;
+            background: #f0f0f0;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .choice-text {
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* Start Button */
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 18px;
+            width: 100%;
+            border-radius: 100px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0, 210, 106, 0.4);
+            transition: transform 0.2s;
+        }
+        .btn-primary:hover { transform: translateY(-3px); }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes pulse-red {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            75% { transform: translateX(-10px); }
+            100% { transform: translateX(0); }
+        }
+
+        .shake-anim {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* Confetti */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            animation: fall linear forwards;
+            top: -20px;
+            z-index: 999;
+        }
+        @keyframes fall {
+            to { transform: translateY(800px) rotate(720deg); }
+        }
+
+        /* Toast */
+        .toast {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #ff4757;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 14px;
+            opacity: 0;
+            transition: all 0.3s;
+            white-space: nowrap;
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        
+        /* Badges */
+        .badge {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #2196f3;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="phone" id="phone-frame">
+        <div class="status-bar">
+            <span>9:41</span>
+            <span>Go.2 Yuanqi</span>
+            <span>🔋 100%</span>
+        </div>
+
+        <div class="meter-container">
+            <div class="meter-fill" id="thirst-bar"></div>
+        </div>
+        <div style="text-align: center; font-size: 10px; color: #999; margin-top: -8px; margin-bottom: 10px;">THIRST LEVEL</div>
+
+        <div class="screen-container">
+            
+            <div class="slide active" id="slide-0">
+                <div class="emoji-icon">☀️💧🔥</div>
+                <h1>Professor,<br>You are Thirsty!</h1>
+                <p>You are at the Library. You need a Chi Forest drink to survive the lecture.</p>
+                <button class="btn-primary" onclick="nextSlide(1)">Start Mission</button>
+            </div>
+
+            <div class="slide" id="slide-1">
+                <span class="badge">LEVEL 1: EFFICIENCY</span>
+                <h2>Where is the drink?</h2>
+                <p>Don't waste time walking blindly.</p>
+                
+                <div class="choice-card" onclick="wrongAnswer('Walking Blindly? That takes 10 mins!')">
+                    <div class="choice-icon">🚶‍♂️</div>
+                    <div class="choice-text">Walk around and guess</div>
+                </div>
+
+                <div class="choice-card" onclick="correctAnswer(1)">
+                    <div class="choice-icon" style="background: #e0f7fa; color: #00bcd4;">🗺️</div>
+                    <div class="choice-text">One-Click Navigation</div>
+                    <div style="margin-left:auto; font-size: 12px; color: #00bcd4;">Smart Map</div>
+                </div>
+            </div>
+
+            <div class="slide" id="slide-2">
+                <span class="badge">LEVEL 2: TRANSPARENCY</span>
+                <h2>You arrived!</h2>
+                <p>But wait... is it healthy? Don't play "Blind Box".</p>
+                
+                <div class="choice-card" onclick="wrongAnswer('Too risky! It might have 200 calories.')">
+                    <div class="choice-icon">🎲</div>
+                    <div class="choice-text">Buy Randomly</div>
+                </div>
+
+                <div class="choice-card" onclick="correctAnswer(2)">
+                    <div class="choice-icon" style="background: #e8f5e9; color: #00c853;">🥗</div>
+                    <div class="choice-text">Check Calories First</div>
+                    <div style="margin-left:auto; font-size: 12px; color: #00c853;">Data View</div>
+                </div>
+            </div>
+
+            <div class="slide" id="slide-3">
+                <span class="badge">LEVEL 3: COMMUNITY</span>
+                <h2>Grape Soda is gone!</h2>
+                <p>The machine is out of stock. The old way is to give up.</p>
+                
+                <div class="choice-card" onclick="wrongAnswer('Don\'t be sad! Be empowered!')">
+                    <div class="choice-icon">😭</div>
+                    <div class="choice-text">Go home sad</div>
+                </div>
+
+                <div class="choice-card" onclick="correctAnswer(3)">
+                    <div class="choice-icon" style="background: #fff3e0; color: #ff9800;">💡</div>
+                    <div class="choice-text">"Do Me a Flavor"</div>
+                    <div style="margin-left:auto; font-size: 12px; color: #ff9800;">Post Wish</div>
+                </div>
+            </div>
+
+            <div class="slide" id="slide-4" style="text-align: center;">
+                <div class="emoji-icon" style="animation: none; font-size: 100px;">🥤</div>
+                <h1 style="color: var(--primary);">Mission Complete!</h1>
+                <p>You utilized Efficiency, Transparency, and Community.</p>
+                
+                <div style="background: white; padding: 20px; border-radius: 20px; box-shadow: var(--shadow); margin-bottom: 20px;">
+                    <div style="color: #999; font-size: 12px; font-weight: bold; letter-spacing: 1px;">REWARD</div>
+                    <div style="font-size: 40px; font-weight: 800; color: var(--primary);">100 PTS</div>
+                </div>
+
+                <button class="btn-primary" onclick="location.reload()" style="background: #333;">Replay</button>
+            </div>
+
+        </div>
+
+        <div class="toast" id="toast">Wrong Answer!</div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+
+        function nextSlide(slideIndex) {
+            // Animation Out
+            document.getElementById(`slide-${currentSlide}`).classList.add('exit-left');
+            document.getElementById(`slide-${currentSlide}`).classList.remove('active');
+
+            // Animation In
+            currentSlide = slideIndex;
+            const next = document.getElementById(`slide-${currentSlide}`);
+            next.classList.remove('exit-left');
+            next.classList.add('active');
+
+            // Update Thirst Bar (Visual Logic)
+            const thirstBar = document.getElementById('thirst-bar');
+            if(slideIndex === 4) {
+                thirstBar.style.width = '0%'; // Thirst quenched
+                thirstBar.style.background = '#00d26a'; // Green
+                spawnConfetti();
+            } else {
+                // Lower the thirst level slightly to show "relief" is coming, or keep it high tension
+                // Let's make it drop as we get closer to the drink
+                let width = 90 - (slideIndex * 20); 
+                thirstBar.style.width = width + '%';
+            }
+        }
+
+        function wrongAnswer(msg) {
+            // Shake the phone
+            const phone = document.getElementById('phone-frame');
+            phone.classList.remove('shake-anim');
+            void phone.offsetWidth; // trigger reflow
+            phone.classList.add('shake-anim');
+
+            // Show Toast
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        function correctAnswer(nextIndex) {
+            // Spawn mini particles at click (optional, keeping it clean for now)
+            nextSlide(nextIndex + 1); // Go to next level (current input is level number, visual is slide index)
+        }
+
+        // Confetti Effect
+        function spawnConfetti() {
+            const colors = ['#00d26a', '#ff4757', '#ffa502', '#3742fa'];
+            for (let i = 0; i < 50; i++) {
+                const conf = document.createElement('div');
+                conf.classList.add('confetti');
+                conf.style.left = Math.random() * 100 + '%';
+                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                conf.style.animationDuration = (Math.random() * 2 + 1) + 's';
+                document.getElementById('slide-4').appendChild(conf);
+            }
+        }
+    </script>
+</body>
+</html>
